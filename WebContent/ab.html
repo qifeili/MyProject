@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title> 子网页 </title>
+</head>
+<body style="border: 1px #ccc solid;">               
+   <a href="javascirpt:void(0)" onclick="guanbi()" style="color:green; font-family:微软雅黑;font-size:13px;">关闭页面</a>  
+        
+     <!-- (1)打包图模块 -->
+<div id="header" style="width:100%;background-color:gray;"><h1 style="color:white;text-align:center">分屏实验 (打包图)</h1></div>
+<div id="dabaotu"  align="center" style="background-color:white; width:100%;height:670px; margin: 0 auto; border:solid; color:gray;" >
+<h2 style="margin-bottom:1;text-align:center;color:gray;" >come on !</h2> 
+<button onclick="ab1()" style="border-color:#cccccc;background-color:#cccccc;color:#5c5c8a;" >触发实验</button><br><br>
+</div>
+     <!-- (2)添加的试验模块 -->
+<div align="center">
+<canvas id="myCanvas" width="500" height="100" style="border:2px solid #c3c3c3;"
+onmouseover="ab1()" onmouseout="ab2()"></canvas><br>
+<input type="text" id="tex" name="shiyan" value="pack" style="color:#80dfff; text-align:center">     </div>     
+ <div id=    ><input type="hidden" value="获取父页面的window对象"/></div>  
+</body>  
+ 
+    <!-- 1.打包图(d3.js) -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="js/d3.min.js"></script><script src="js/d3.js"></script>
+<script>
+	var width  = 500;
+	var height = 500;
+	
+	var pack = d3.layout.pack()
+	    			.size([ width, height ])
+	    			.radius(20);
+	
+	var svg = d3.select("#dabaotu").append("svg")
+	    .attr("width", width)
+	    .attr("height", height)
+	    .append("g")
+	    .attr("transform", "translate(0,0)");
+	
+	
+	d3.json("dabaotu.json", function(error, root) {
+		
+		var nodes = pack.nodes(root);
+		var links = pack.links(nodes);
+		
+		console.log(nodes);
+		console.log(links);
+		
+		svg.selectAll("circle")
+			.data(nodes)
+			.enter()
+			.append("circle")
+		    .attr("fill","rgb(31, 119, 180)") 
+			.attr("fill-opacity","0.4")
+			.attr("cx",function(d){
+				return d.x;
+			})
+			.attr("cy",function(d){
+				return d.y;
+			})
+			.attr("r",function(d){
+				return d.r;
+			})			
+			.on("mouseover",function(d,i){	
+				 console.log(d,i); 
+				 over(i);  
+			/* 	d3.select(this)
+				.attr("fill","yellow") */; 				    
+			})
+			.on("mouseout",function(d,i){
+				out(i);
+				/* d3.select(this)
+					.attr("fill","rgb(31, 119, 180)"); */
+			});
+		
+          	svg.selectAll("text")
+					  .data(nodes)
+					  .enter()
+					  .append("text")
+					  .attr("font-size","10px")
+					  .attr("fill","white")
+					  .attr("fill-opacity",function(d){
+						  if(d.depth == 2) 
+							  return "0.9";
+						  else
+							  return "0";
+					  })
+					  .attr("x",function(d){ return d.x; })
+					  .attr("y",function(d){ return d.y; })
+					  .attr("dx",-12)
+					  .attr("dy",1)
+					  .text(function(d){ return d.name; });
+	});
+	 //////////////// 2.控制convas变色的函数 //////////////////
+	function chu1(){
+	var c=document.getElementById("myCanvas");
+	var ctx=c.getContext("2d");
+	ctx.fillStyle="#990000";
+	ctx.fillRect(0,0,500,100);
+	};
+	function chu2(){
+		var c=document.getElementById("myCanvas");
+		var ctx=c.getContext("2d");
+		ctx.fillStyle="white";
+		ctx.fillRect(0,0,500,100);
+		}; 
+    function mouseover(m){
+			svg.selectAll("circle")
+			.attr("fill",function(d,i){
+				if(i==m){
+				return "gold";}
+				else {return "rgb(31, 119, 180)" }
+				});
+			};  
+	function mouseout(m){
+			svg.selectAll("circle")
+     		.attr("fill",function(d,i){					
+					return "rgb(31, 119, 180)";					
+				});
+	}
+	function guanbi(){
+		// if(confirm("您确定要关闭本页吗？")){ 
+		window.opener=null;
+		window.open('','_self');
+		window.close();
+		// } 
+	}
+</script>
+       
+    
+    <!-- 3.websocket通道函数 -->
+   
+  <script type="text/javascript">
+      var websocket = null;
+       
+      //判断当前浏览器是否支持WebSocket
+       var pathName=window.document.location.pathname;
+       var projectName=pathName.substring(0,pathName.substr(1).indexOf('/')+1); 
+      console.log(pathName); console.log(projectName);
+      if('WebSocket' in window){
+          websocket = new WebSocket((window.location.protocol=="http:"?"ws://":"wss://") 
+  			+ (document.location.hostname == "" ? "localhost" : document.location.hostname) + ":" 
+			+ (document.location.port == "" ? "80" : document.location.port) 
+			+ projectName+"/websocket");
+        console.log(websocket);
+      }
+      else{
+          alert('Not support websocket')
+      }
+       
+      //连接发生错误的回调方法
+      websocket.onerror = function(){
+          setMessageInnerHTML("error");
+      };
+       
+      //连接成功建立的回调方法
+      websocket.onopen = function(event){
+            setMessageInnerHTML("success"); 
+      }
+       
+      //接收到消息的回调方法
+      websocket.onmessage = function(m){       
+    	  eval("("+m.data+")"); 
+      }
+       
+      //连接关闭的回调方法
+      websocket.onclose = function(){
+          setMessageInnerHTML("close");
+      }
+       
+      //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+      window.onbeforeunload = function(){
+          websocket.close();
+      }
+       
+      //将消息显示在网页上
+      function setMessageInnerHTML(innerHTML){
+         // document.getElementById('message').innerHTML += innerHTML + '<br/>';
+      }
+       
+      //关闭连接
+      function closeWebSocket(){
+          websocket.close();
+      }
+       
+      //发送消息
+      function send(){
+          var message = document.getElementById('text').value;
+          websocket.send(message);
+      }
+      function ab1(){
+    	  websocket.send("chu1()");  	  
+      }
+      function ab2(){
+    	  websocket.send("chu2()");  	  
+      } 
+      function over(i){  
+           websocket.send("mouseover("+i+")");                             	 
+      };
+      function out(i){
+    	   websocket.send("mouseout("+i+")");
+      }
+  </script>
+
+ <!-- 4.iframe父子页面控制函数 -->
+   <!-- <script type="text/javascript">
+    var oIfr = document.getElementById("ifr"),
+        aBtns = document.getElementById("btn").getElementsByTagName("input"); 
+
+    //设置domain，和谐跨域访问限制。
+    document.domain = "localhost";
+
+    //iframe相关操作
+    var getIframe = {
+        //在iframe里获得父页面的window对象
+        getParents : function(){
+            return {
+                parent : window.parent,
+                top : window.top
+            }
+        }
+    };      
+   //获取父页面的window
+    aBtns[0].onclick = function(){
+        getIframe.getParents().parent.showDemo();
+    }; 
+
+    function ab(){   
+     websocket.send("guanbi()");   
+    }; -->
+</script>
+</html>

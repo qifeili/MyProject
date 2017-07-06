@@ -1,0 +1,62 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>左半边网页</title>
+</head>
+<style>
+ *{margin:0px 0px 0px 0px;
+ overflow:hidden;} 
+</style>
+<body>
+
+<!-- <button onclick="chu()">关闭ab.html</button>  控制子页面ab.html页面关闭-->
+<div id="flush1">
+ <iframe id="ifr" src="ab.html" frameborder="0" width="200%"  height="900px" scrolling="yes"></iframe>
+</div>
+
+<!-- 父页面和子页面交互 -->
+<script type="text/javascript">//数据交互
+    var oIfr = document.getElementById("ifr");
+    //设置domain，和谐跨域访问限制
+    document.domain = "localhost";
+
+    //iframe相关操作
+    var getIframe = {
+        //获取iframe的window对象
+        getWin : function(obj){
+            return obj.contentWindow;
+        },
+        //获取iframe的document
+        getDoc : function(obj){
+            //chrome and ff or ie
+            return obj.contentDocument || obj.contentWindow.document;
+        },
+        //在iframe里获得父页面的window对象
+        getParents : function(){
+            return {
+                parent : window.parent,
+                top : window.top
+            }
+        },
+        //动态创建iframe，返回创建好的iframe标签html
+        createIframe : function(src, fncallback){
+            var ifr = document.createElement("iframe");
+            ifr.src = src;
+            if(ifr.attachEvent){
+                ifr.attachEvent("onload", fncallback);
+            }else{
+                ifr.addEventListener("load", fncallback, false);
+            }
+
+            return ifr;
+        }
+    };
+
+    function chu(){ 
+        getIframe.getWin(oIfr).ab(); 
+          //alert("成功返回父页面");
+       };
+</script>
+
+</body>  
+</html> 

@@ -1,0 +1,393 @@
+<html>  
+<head>  
+     <meta charset="utf-8">  
+     <title>标注地点</title>  
+</head> 
+<link href="css/ab.css" rel="stylesheet">
+<style>
+	body{padding:0;margin:0;}
+	#bg{width:100%;height:100%;position:absolute;z-index:-1;}
+</style>
+<body style="background-color:#000033;">
+  <img id="bg" src="images/wuyu.tmp.jpg"/>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://www.ourd3js.com/demo/d3/topojson.js"></script>
+<!-- 区块布局  -->
+
+<!-- 1.地图 -->
+<div id="ditu" style="position:absolute;left:550px;"></div>
+<div style="opacity:0;position:absolute;left:340px;width:10px;height:150px;">
+<a href="CHNindex.html"><button  style="border-radius:5px; font-size:30px;border-color:#00b38f;background-color:#00b38f;width:90px;height:40px; color:white">主页</button>
+</a></div>
+
+<!-- 2.左上角 -->
+<div style="opacity:1;position:absolute;left:20px;width:300px;height:550px;background-color:#003f80">
+<!--第一行--><h1 style="color:#f2f2f2; font-size:30px;font-family:STHeiti">大数据展示平台：</h1>
+<!--第二行--><span style="color:#d9d9d9;font-size:26px font-family:STHeiti">Exhibition level</span>
+<button  style="border-color:#003399;background-color:#003399;width:57px;height:20px; color:red">highest</button><br><br>
+<!--第三行--><button  style="border-color:#003399;background-color:#003399;width:2px;height:15px"></button>
+<span style="color:#d9d9d9; font-size:20px; font-family:STHeiti">Price forecast 24 hours</span>
+<!--第四行--><h1 style="padding-left:10px;color:#f2f2f2; font-size:35px;font-family:STHeiti">116,466</h1>
+<!--第五行--><button  style="border-color:#003399;background-color:#003399;width:2px;height:15px"></button>
+<span style="color:#d9d9d9; font-size:18px; font-family:STHeiti">Number of customers</span>
+<!--第六行--><h1 style="padding-left:10px;color:#f2f2f2; font-size:35px;font-family:STHeiti">2,496</h1>
+<!--第7行--><button  style="border-color:#003399;background-color:#003399;width:2px;height:15px"></button>
+<span style="color:#d9d9d9; font-size:18px; font-family:STHeiti">Products domain</span>
+<!--第8行--><h1 style="padding-left:10px;color:#f2f2f2; font-size:35px;font-family:STHeiti">8,639</h1>
+</div>
+
+<!-- 3.右上角条形图 -->
+<div id="rect" style="opacity:1;position:absolute;left:1590px;width:300px;height:550px;background-color:#003f80">
+<h1 style="color:#e6e6e6">&nbsp<b>Rect Datas</b></h1></div>
+
+<!-- 4.下方小区块-->
+<div style="opacity:1;position:absolute;left:330px;top:580px;width:300px;height:30px;background-color:#001966">
+<span style="color:#0086b3; font-size:20px; font-family:STHeiti">CMoney:low</span>
+<button style="border-color:#33ccff;background-color:#33ccff;width:30px;height:18px"></button>
+<button style="border-color:yellow;background-color:yellow;width:30px;height:18px"></button>
+<button style="border-color:#ff1a1a;background-color:#ff1a1a;width:30px;height:18px"></button>
+<span style="color:#0086b3; font-size:20px; font-family:STHeiti">high</span>
+</div>
+
+<!-- 5.底部大区块 -->
+<div id="graph" style="opacity:1;position:absolute;left:310px;top:630px;width:1300px;height:345px;background-color: #00004d">
+<span style="padding-left:10px; font-size:28px;letter-spacing:1px;font-weight:bold; color:#e6e6e6">Global Web Site</span>
+<div style="opacity:1;position:absolute;left:130px;top:50px;width:1150px;height:2px;background-color:gray"></div>
+<div style="opacity:1;position:absolute;left:130px;top:120px;width:1150px;height:2px;background-color:gray"></div>
+<div style="opacity:1;position:absolute;left:130px;top:190px;width:1150px;height:2px;background-color:gray"></div>
+</div>
+
+<!--地图 -->
+<script>
+var width = 900,
+	height = 850;
+	
+var svg = d3.select("#ditu").append("svg")
+	.attr("width", width)
+	.attr("height", height);
+
+
+var projection = d3.geo.mercator()
+						.center([107, 31])
+						.scale(700)
+    					.translate([width/2, height/2]);
+	
+var path = d3.geo.path()
+				.projection(projection);	
+
+
+	
+d3.json("china.topojson", function(error, toporoot) {
+	if (error) 
+		return console.error(error);
+	
+	//输出china.topjson的对象
+	console.log(toporoot);
+	
+	//将TopoJSON对象转换成GeoJSON，保存在georoot中
+	var georoot = topojson.feature(toporoot,toporoot.objects.china);
+	
+	//输出GeoJSON对象
+	console.log(georoot);
+
+	//包含中国各省路径的分组元素
+	var china = svg.append("g");
+	
+	var color = d3.scale.category20();
+	//添加中国各省的路径元素
+	var provinces = china.selectAll("path")
+			.data( georoot.features )
+			.enter()
+			.append("path")
+			.attr("class","province")
+			/* .attr("fill", function(d,i){
+				return color(i);
+			}) */
+			.attr("fill", "#0086b3")
+			.attr("d", path )
+			.on("mouseover",function(d,i){
+                d3.select(this)
+                    .attr("fill","#00a3cc");
+            })
+            .on("mouseout",function(d,i){
+                d3.select(this)
+                    .attr("fill","#0086b3");
+            });
+
+
+	d3.json("province.json", function(error, places ) {
+
+		//插入分组元素
+		var location = svg.selectAll(".location")
+						.data(places.location)
+						.enter()
+						.append("g")
+						.attr("class","location")
+						.attr("transform",function(d){
+							//计算标注点的位置
+							var coor = projection([d.log, d.lat]);
+							return "translate("+ coor[0] + "," + coor[1] +")";
+						});
+
+		        //插入圆
+ 		        location.append("circle")
+			            .attr("r",function(d,i){			          
+			            	if(i==2||i==0){return "9";}
+			            	else{return  "7"};
+			            })
+			            .attr("fill",function(d,i){			          
+			            	if(i==2||i==0){return "#ff6600";}
+			            	else{return  "#ffff66"};
+			            })
+			            .on("mouseover",function(d,i){
+			            	d3.select(this) 
+			            	.attr("r","10")
+			            })
+			            .on("mouseout",function(d,i){
+			            	d3.select(this)
+			            	  .attr("r","7")            	  
+			            });
+	   //圆环上的光环特效
+	            location.append("circle")
+			            .attr("r",function(d,i){			          
+			            	if(i==2||i==0){return "9";}
+			            	else{return  "7"};
+			            })
+			            .attr("fill",function(d,i){			          
+			            	if(i==2||i==0){return "#ff6600";}
+			            	else{return  "#ffff66"};
+			            })
+			            .attr("opacity","0")
+			            .on("mouseover",function(d,i){
+			            	d3.select(this) 
+			            	.attr("r","30")
+			            	.attr("fill","#ffff66")
+			            	.attr("opacity","0.4");
+			            })
+			            .on("mouseout",function(d,i){
+			            	d3.select(this)
+			            	  .attr("r",function(d,i){			          
+			            	       if(i==2||i==0){return "9";}
+			            	       else{return  "7"};
+			               })
+			                  .attr("opacity","0")
+			                  .attr("fill",function(d,i){			          
+			            	     if(i==2||i==0){return "#ff6600";}
+			            	     else{return  "#ffff66"}			            	 
+			              })  			                 
+			            });
+
+	/* 	//插入一张图片
+		location.append("image")
+			.attr("x",20)
+			.attr("y",-40)
+			.attr("width",90)
+			.attr("height",90)
+			.attr("xlink:href",function(d){
+				return d.img;
+			}); */
+
+	});
+});
+
+</script>
+
+<!-- 矩形图 -->
+<script>
+
+var svg2 = d3.select("#rect")				//选择文档中的body元素
+			 .append("svg")				//添加一个svg元素
+			 .attr("width", 300)		//设定宽度
+			 .attr("height", 400);	//设定高度
+
+var rectHeight = 38;	//每个矩形所占的像素高度(包括空白)
+
+d3.json("rectdata.json",function(error,data){     
+	console.log(data.parameter);
+
+ 	 var rectScale=d3.scale.linear()
+                    .domain([0,7000])
+                    .range([0,180]);  
+     var colorScale=d3.scale.linear()
+                     .domain([2000,5000,7000])
+                     .range(["#33ccff","yellow","#ff1a1a"]);
+  
+  var rectg=svg2.selectAll("g")
+                .data(data.parameter)
+                .enter()
+                .append("g");
+                         
+                     
+ rectg.selectAll("rect")
+	  .data(data.parameter)
+	  .enter()
+	  .append("rect")
+	  .attr("x",55)
+	  .attr("y",function(d,i){
+			return i * rectHeight;
+	  })
+	  .attr("width",function(d){
+	   		return rectScale(d.money);
+	  })
+	  .attr("height",rectHeight-15)
+	  .attr("fill",function(d){
+		  return colorScale(d.money);
+	  })
+	  .on("mouseover",function(d){
+		  d3.select(this)
+		    .attr("fill","#ccffcc")		 
+		    .attr("height",rectHeight-13)
+	  })	    
+	  .on("mouseout",function(d){
+		  d3.select(this)
+		    .attr("fill",function(d){
+				  return colorScale(d.money)
+	                                })
+	        .attr("height",rectHeight-15);
+	  }); 
+    //插入矩形名称
+     var rectName=rectg.append("text")
+                       .attr("x","10")
+                       .attr("y",function(d,i){
+               			return i * rectHeight;
+                 	   })
+                 	   .attr("dy","16")
+                 	   .attr("fill","#f2f2f2")
+                 	   .text(function(d){return d.name});
+    
+    //插入矩形数据
+     var rectData=rectg.append("text")
+                       .attr("x","250")
+                       .attr("y",function(d,i){
+               			return i * rectHeight;
+                 	   })
+                 	   .attr("dy","16")
+                 	   .attr("fill","#f2f2f2")
+                 	   .text(function(d){return d.money});
+    
+    
+});
+</script>	
+
+<!-- 折线图 -->
+<script>
+  var graphsvg= d3.select("#graph")				//选择文档中的body元素
+			 .append("svg")				//添加一个svg元素
+			 .attr("width", 1300)		//设定宽度
+			 .attr("height", 270);	//设定高度
+
+	 var graphdata=[  
+			              {   country:"china",  
+			                  gdp:[[2000,25],[2001,24],[2002,25],  
+			                      [2003,25],[2004,26],[2005,24],  
+			                      [2006,24],[2007,25],[2008,24],  
+			                      [2009,25],[2010,24],[2011,25],  
+			                      [2012,25],[2013,24]]  
+			              },  
+			              {  
+			                  country:"japan",  
+			                  gdp:[[2000,15],[2001,14],[2002,15],  
+			                      [2003,16],[2004,15],[2005,15],  
+			                      [2006,15],[2007,16],[2008,14],  
+			                      [2009,15],[2010,15],[2011,15],  
+			                      [2012,17],[2013,16]]  
+			              } ,  
+			              {  
+			                  country:"japan",  
+			                  gdp:[[2000,5],[2001,4],[2002,5],  
+			                      [2003,6],[2004,5],[2005,5],  
+			                      [2006,5],[2007,6],[2008,4],  
+			                      [2009,5],[2010,5],[2011,5],  
+			                      [2012,7],[2013,6]]  
+			              },  
+			              {  
+			                  country:"japan",  
+			                  gdp:[[2000,4],[2001,3],[2002,5],  
+			                      [2003,5],[2004,4],[2005,4],  
+			                      [2006,4],[2007,5],[2008,4],  
+			                      [2009,5],[2010,4],[2011,5],  
+			                      [2012,6],[2013,5]]  
+			              },  
+			              {  
+			                  country:"japan",  
+			                  gdp:[[2000,6],[2001,4],[2002,4],  
+			                      [2003,5],[2004,4],[2005,6],  
+			                      [2006,4],[2007,5],[2008,6],  
+			                      [2009,6],[2010,5],[2011,4],  
+			                      [2012,5],[2013,6]]  
+			              }/* ,  
+			              {  
+			                  country:"line1",  
+			                  gdp:[[2000,21],[2013,21],]  
+			              }   */
+			          ];  
+			 
+var gdpmax=0;
+for(var i=0;i<graphdata.length;i++){  
+   var curgdp=d3.max(graphdata[i].gdp,function(d){
+	      return d[1];
+   });
+   if(curgdp>gdpmax)
+	   gdpmax=curgdp;
+   }
+console.log(gdpmax);
+
+var xScale=d3.scale.linear()
+             .domain([2000,2014])
+             .range([150,1230]);
+var yScale=d3.scale.linear()
+             .domain([0,30])
+             .range([230,10]);
+ 
+var linePath=d3.svg.line()
+                   .x(function(d){
+                    console.log(d[1]);
+	                 return xScale(d[0])
+                       })
+                   .y(function(d){
+	                   return yScale(d[1])
+                       });
+  
+  colors=["red","green","#44cc00","#660022"," #00a3cc"];
+  
+  graphsvg.selectAll("path")
+     .data(graphdata)
+     .enter()
+     .append("path")
+     .attr("transform","translate(10,10)")
+     .attr("d",function(d){
+   console.log(d.gdp); 	 return linePath(d.gdp)
+     })
+     .attr("fill","none")
+     .attr("stroke-width",3)
+     .attr("stroke",function(d,i){
+    	 return colors[i];
+     })
+     .attr("opacity","1");  
+
+  var xAxis=d3.svg.axis()
+              .scale(xScale)
+              .ticks(9)
+              .tickFormat(d3.format("d"))
+              .orient("bottom")
+              
+  var yAxis=d3.svg.axis()
+              .scale(yScale)
+              .ticks(8)
+              .orient("left");
+              
+  graphsvg.append("g")
+          .attr("class","axis")
+          .attr("transform","translate(10,230)")
+          .attr("fill","yellow")
+          .call(xAxis);
+
+  graphsvg.append("g")  
+          .attr("class","axis")  
+          .attr("transform","translate(100,10)")  
+          .attr("fill","yellow")
+          .call(yAxis);   
+  
+  </script> 
+</body>  
+</html>  
