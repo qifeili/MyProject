@@ -1,4 +1,1 @@
-Git is a version control system.
-Git is free software.
-qifei add 3 hang.
-qifei add 4 hang.
+这个是所里展厅展示的农产品价格项目 后端程序
